@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404: REALITY NOT FOUND — Deep Space Vault v6.0</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Fira+Code:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"Fira Code"', 'monospace'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        orbitron: ['"Orbitron"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #010206;
+            color: #d1d5db;
+        }
+        #spaceCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .space-card {
+            background: rgba(6, 11, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .space-card:hover {
+            border-color: rgba(56, 189, 248, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px -10px rgba(56, 189, 248, 0.4);
+        }
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            border-bottom-color: #38bdf8;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #010206; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col justify-between relative overflow-x-hidden selection:bg-sky-500 selection:text-white">
+
+    <!-- Realistis Animated Solar System Canvas -->
+    <canvas id="spaceCanvas"></canvas>
+
+    <!-- Header Navigation -->
+    <nav class="border-b border-sky-500/20 bg-black/70 backdrop-blur-xl sticky top-0 z-40 px-6 py-3">
+        <div class="container mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
+                <span class="font-orbitron font-bold text-sky-100 text-sm tracking-widest">DEEP-VAULT <span class="text-[10px] font-mono text-cyan-400 font-normal">v6.0.4</span></span>
+            </div>
+            
+            <div class="flex items-center gap-3 text-xs font-mono">
+                <button onclick="toggleTerminal()" class="px-3 py-1.5 rounded-lg bg-sky-950/50 hover:bg-sky-900/60 border border-sky-500/30 text-cyan-300 transition-all flex items-center gap-1.5">
+                    <span>>_</span> TERMINAL
+                </button>
+                <button onclick="openSystemStatus()" class="px-3 py-1.5 rounded-lg bg-sky-950/50 hover:bg-sky-900/60 border border-sky-500/30 text-sky-300 transition-all flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> TELEMETRY
+                </button>
+                <button onclick="exportData()" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 shadow-lg shadow-sky-900/50 transition-all">
+                    EXPORT DATA
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="container mx-auto px-6 pt-8 pb-6 text-center relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 font-mono text-[11px] mb-4 backdrop-blur-md">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            REAL-WORLD ANOMALY TRACKER — 100 CLASSIFIED RECORDS
+        </div>
+        
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-2 font-orbitron">
+            404: <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">REALITY NOT FOUND</span>
+        </h1>
+        
+        <p class="max-w-xl mx-auto text-gray-400 text-xs md:text-sm leading-relaxed font-light">
+            An encrypted database mapping anomalous non-Euclidean relics, biological horrors, and spatial distortions tied to real geographic locations on Earth.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="max-w-xl mx-auto mt-6 relative">
+            <input type="text" id="searchInput" placeholder="Search by location, anomaly ID, or keyword..." 
+                class="w-full bg-black/70 border border-sky-500/30 rounded-xl px-4 py-3 pl-11 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-mono backdrop-blur-md">
+            <svg class="w-4 h-4 absolute left-4 top-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap justify-center gap-2 mt-5" id="filterContainer">
+            <button onclick="filterCategory('all', this)" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-mono bg-sky-600 text-white border border-sky-400 shadow-md transition-all">
+                ✨ ALL RECORDS
+            </button>
+            <button onclick="filterCategory('locations', this)" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-mono bg-black/50 hover:bg-sky-950/60 text-gray-400 border border-sky-500/20 transition-all">
+                🌌 LOCATIONS
+            </button>
+            <button onclick="filterCategory('artifacts', this)" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-mono bg-black/50 hover:bg-sky-950/60 text-gray-400 border border-sky-500/20 transition-all">
+                🕰️ ARTIFACTS
+            </button>
+            <button onclick="filterCategory('entities', this)" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-mono bg-black/50 hover:bg-sky-950/60 text-gray-400 border border-sky-500/20 transition-all">
+                👤 ENTITIES
+            </button>
+            <button onclick="filterCategory('phenomena', this)" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-mono bg-black/50 hover:bg-sky-950/60 text-gray-400 border border-sky-500/20 transition-all">
+                ✨ PHENOMENA
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="container mx-auto px-6 py-4 flex-grow relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="archiveGrid"></div>
+
+        <!-- Pagination -->
+        <div class="mt-10 flex justify-center items-center gap-3 font-mono text-xs">
+            <button id="prevBtn" onclick="changePage(-1)" class="px-3.5 py-1.5 rounded-lg bg-black/70 border border-sky-500/30 hover:bg-sky-600 hover:border-sky-400 transition-all disabled:opacity-30 disabled:pointer-events-none">
+                ← PREV
+            </button>
+            <span id="pageIndicator" class="text-gray-400 bg-black/80 px-3.5 py-1.5 rounded-lg border border-sky-500/20">PAGE 1 / 12</span>
+            <button id="nextBtn" onclick="changePage(1)" class="px-3.5 py-1.5 rounded-lg bg-black/70 border border-sky-500/30 hover:bg-sky-600 hover:border-sky-400 transition-all disabled:opacity-30 disabled:pointer-events-none">
+                NEXT →
+            </button>
+        </div>
+    </main>
+
+    <!-- Multi-Tab Archive Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="space-card max-w-3xl w-full max-h-[85vh] overflow-y-auto rounded-2xl p-6 relative border border-sky-500/40 text-left shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="modalHeader"></div>
+
+            <!-- Tab Navigation Menu -->
+            <div class="flex border-b border-sky-500/20 my-4 font-mono text-xs gap-1">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active px-4 py-2 rounded-t-lg font-semibold">
+                    📋 OVERVIEW
+                </button>
+                <button onclick="switchTab('location')" id="tab-location" class="tab-btn px-4 py-2 rounded-t-lg font-semibold text-gray-400">
+                    📍 REAL LOCATION
+                </button>
+                <button onclick="switchTab('evidence')" id="tab-evidence" class="tab-btn px-4 py-2 rounded-t-lg font-semibold text-gray-400">
+                    ⚠️ CLASSIFIED EVIDENCE
+                </button>
+            </div>
+
+            <!-- Tab Content Sections -->
+            <div id="tabContent-overview" class="tab-page"></div>
+            <div id="tabContent-location" class="tab-page hidden"></div>
+            <div id="tabContent-evidence" class="tab-page hidden"></div>
+        </div>
+    </div>
+
+    <!-- Terminal Drawer Window -->
+    <div id="terminalDrawer" class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-sky-500/40 p-5 z-50 transform translate-y-full transition-transform duration-300 font-mono text-xs hidden">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-2 text-cyan-400 border-b border-white/10 pb-2">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    QUANTUM ORBITAL TERMINAL
+                </span>
+                <button onclick="toggleTerminal()" class="text-gray-500 hover:text-white">[CLOSE]</button>
+            </div>
+            <div id="terminalOutput" class="h-28 overflow-y-auto bg-black/50 p-3 rounded-lg border border-white/5 text-emerald-400 space-y-1 mb-2">
+                <p>> Solar orbit simulation 60 FPS active.</p>
+                <p>> Type 'help' for terminal parameters.</p>
+            </div>
+            <input type="text" id="terminalInput" onkeydown="handleTerminalCommand(event)" placeholder="Enter command (e.g., 'scan', 'count', 'clear', 'random')..." class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-white focus:outline-none focus:border-cyan-400">
+        </div>
+    </div>
+
+    <!-- Telemetry Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4 hidden">
+        <div class="space-card max-w-sm w-full rounded-2xl p-5 border border-cyan-500/40 text-left font-mono text-xs">
+            <h3 class="text-sm font-bold text-cyan-300 mb-3 flex items-center gap-2 font-orbitron">
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                TELEMETRY DIAGNOSTICS
+            </h3>
+            <div class="space-y-2.5 text-gray-300">
+                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                    <span>CANVAS SIMULATION</span>
+                    <span class="text-emerald-400">3D-SOLAR REALISTIC</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                    <span>DATABASE LOGS</span>
+                    <span class="text-sky-300">100 REAL LOCATIONS</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                    <span>CONTAINMENT LEVEL</span>
+                    <span class="text-yellow-400">CLASS-OMEGA</span>
+                </div>
+            </div>
+            <button onclick="closeSystemStatus()" class="mt-5 w-full py-2 rounded-lg bg-sky-600/30 hover:bg-sky-600 border border-sky-400 text-sky-200 transition-all">
+                CLOSE DIAGNOSTICS
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-sky-500/20 py-6 text-center text-xs text-gray-600 font-mono relative z-10 mt-8">
+        <p>404: REALITY NOT FOUND &copy; 2026 — REAL-WORLD CLASSIFIED ANOMALY DATABASE.</p>
+    </footer>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // ================= SIMULASI TATA SURYA REALISTIS (3D-LIKE CANVAS) =================
+        const canvas = document.getElementById('spaceCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const stars = [];
+        for (let i = 0; i < 350; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 1.8,
+                alpha: Math.random()
+            });
+        }
+
+        // Ukuran & Orbit Lebih Besar + Efek Realistic Lighting (Bayangan 3D)
+        const planets = [
+            { name: "Mercury", radius: 8, distance: 110, speed: 0.015, color: "#a1a1aa", angle: 0.5 },
+            { name: "Venus", radius: 14, distance: 170, speed: 0.010, color: "#fef08a", angle: 1.2 },
+            { name: "Earth", radius: 16, distance: 240, speed: 0.007, color: "#38bdf8", angle: 2.5, hasMoon: true },
+            { name: "Mars", radius: 11, distance: 310, speed: 0.005, color: "#f87171", angle: 3.8 },
+            { name: "Jupiter", radius: 32, distance: 410, speed: 0.003, color: "#fb923c", angle: 0.2 },
+            { name: "Saturn", radius: 24, distance: 520, speed: 0.002, color: "#fde047", angle: 4.5, hasRing: true },
+            { name: "Uranus", radius: 18, distance: 620, speed: 0.0012, color: "#22d3ee", angle: 5.1 },
+            { name: "Neptune", radius: 17, distance: 710, speed: 0.0008, color: "#818cf8", angle: 1.8 }
+        ];
+
+        function drawRealisticSolarSystem() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Background Stars
+            ctx.fillStyle = "#ffffff";
+            stars.forEach(star => {
+                ctx.globalAlpha = star.alpha;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // Draw Sun Gradient Glow Realistis
+            const sunGlow = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, 100);
+            sunGlow.addColorStop(0, 'rgba(253, 224, 71, 1)');
+            sunGlow.addColorStop(0.2, 'rgba(245, 158, 11, 0.8)');
+            sunGlow.addColorStop(0.6, 'rgba(239, 68, 68, 0.2)');
+            sunGlow.addColorStop(1, 'transparent');
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 100, 0, Math.PI * 2);
+            ctx.fillStyle = sunGlow;
+            ctx.fill();
+
+            // Sun Core
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 42, 0, Math.PI * 2);
+            ctx.fillStyle = "#fef08a";
+            ctx.fill();
+
+            // Draw Planets & Realistic Shading
+            planets.forEach(planet => {
+                // Orbit Ellipse
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, planet.distance, planet.distance * 0.45, 0, 0, Math.PI * 2);
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Calculate Position (Perspektif 3D)
+                planet.angle += planet.speed;
+                const px = centerX + Math.cos(planet.angle) * planet.distance;
+                const py = centerY + Math.sin(planet.angle) * (planet.distance * 0.45);
+
+                // Draw Rings if Saturn
+                if (planet.hasRing) {
+                    ctx.beginPath();
+                    ctx.ellipse(px, py, planet.radius * 2.2, planet.radius * 0.6, 0.3, 0, Math.PI * 2);
+                    ctx.strokeStyle = "rgba(253, 224, 71, 0.5)";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // Planet Body
+                ctx.beginPath();
+                ctx.arc(px, py, planet.radius, 0, Math.PI * 2);
+                ctx.fillStyle = planet.color;
+                ctx.fill();
+
+                // Realistic Shading (3D Lighting dari arah Matahari)
+                const angleToSun = Math.atan2(centerY - py, centerX - px);
+                const shadeGrad = ctx.createRadialGradient(
+                    px + Math.cos(angleToSun) * planet.radius * 0.3,
+                    py + Math.sin(angleToSun) * planet.radius * 0.3,
+                    1,
+                    px, py, planet.radius
+                );
+                shadeGrad.addColorStop(0, 'rgba(255,255,255,0.3)');
+                shadeGrad.addColorStop(0.5, 'rgba(0,0,0,0)');
+                shadeGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
+
+                ctx.beginPath();
+                ctx.arc(px, py, planet.radius, 0, Math.PI * 2);
+                ctx.fillStyle = shadeGrad;
+                ctx.fill();
+            });
+
+            requestAnimationFrame(drawRealisticSolarSystem);
+        }
+
+        drawRealisticSolarSystem();
+
+        // ================= DATABASE 100 ANOMALI LOKASI DUNIA NYATA =================
+        const categories = {
+            locations: { label: "🌌 LOCATIONS", tag: "LOC" },
+            artifacts: { label: "🕰️ ARTIFACTS", tag: "ART" },
+            entities: { label: "👤 ENTITIES", tag: "ENT" },
+            phenomena: { label: "✨ PHENOMENA", tag: "PHE" }
+        };
+
+        const realLocations = [
+            { name: "Svalbard Global Seed Vault", country: "Norway", coords: "78°14'09.3\"N 15°29'28.7\"E", threat: "CLASS-RED" },
+            { name: "Mariana Trench (Challenger Deep)", country: "Pacific Ocean", coords: "11°22'24.0\"N 142°35'24.0\"E", threat: "CLASS-BLACK" },
+            { name: "Derinkuyu Underground City", country: "Turkey", coords: "38°22'25.0\"N 34°44'08.0\"E", threat: "CLASS-AMBER" },
+            { name: "Zone of Silence (Zona del Silencio)", country: "Mexico", coords: "26°41'00.0\"N 103°45'00.0\"W", threat: "CLASS-YELLOW" },
+            { name: "Door to Hell (Darvaza Gas Crater)", country: "Turkmenistan", coords: "40°15'08.0\"N 58°26'23.0\"E", threat: "CLASS-RED" },
+            { name: "Aokigahara Subterranean Caves", country: "Japan", coords: "35°28'12.0\"N 138°37'11.0\"E", threat: "CLASS-BLACK" },
+            { name: "Poveglia Island Containment Vault", country: "Italy", coords: "45°22'55.0\"N 12°19'50.0\"E", threat: "CLASS-AMBER" }
+        ];
+
+        const baseThemes = [
+            { 
+                title: "The Unwritten Vault of Svalbard", 
+                cat: "locations", 
+                desc: "Ruang penyimpanan tersembunyi 300 meter di bawah lapisan es permafrost.", 
+                fact: "Pemindaian termal menunjukkan denyut hangat konstan 37°C di dalam dinding es.",
+                creepyLog: `[INCIDENT LOG #SV-09]\n"Kami mendengar suara mesin ketik dari balik dinding es setebal 10 meter. Saat dibor, tidak ada rongga udara—hanya teks bertuliskan 'JANGAN BUKA' yang terukir secara alami di dalam kristal es."`
+            },
+            { 
+                title: "Challenger Abyss Leviathan Core", 
+                cat: "entities", 
+                desc: "Entitas biologis raksasa bermassa silika yang tertidur di kedalaman 10.994 meter.", 
+                fact: "Gelombang sonik yang dipancarkannya menyebabkan halusinasi massal pada awak kapal selam.",
+                creepyLog: `[HYDROPHONE AUDIO TRANSCRIPT]\n00:01 - [Suara gesekan rantai logam raksasa]\n00:05 - "Ia tahu kita ada di sini. Lampu kapal selam mati bersamaan."\n00:12 - [Suara bisikan dalam bahasa yang tidak dikenal]`
+            },
+            { 
+                title: "Derinkuyu Sub-Layer Void Gate", 
+                cat: "artifacts", 
+                desc: "Pintu batu bundar seberat 50 ton yang tidak memiliki celah engsel.", 
+                fact: "Batu pintu menyerap radiasi gamma dan memancarkan bau ozon pekat.",
+                creepyLog: `[SCAN REPORT #DK-404]\n"Kamera kawat yang dimasukkan melalui retakan micro menemukan ruangan kubus berisikan bayangan manusia yang berdiri tidak bergerak menghadap dinding."`
+            }
+        ];
+
+        const archiveData = [];
+        const catKeys = ["locations", "artifacts", "entities", "phenomena"];
+
+        for (let i = 1; i <= 100; i++) {
+            const template = baseThemes[(i - 1) % baseThemes.length];
+            const loc = realLocations[(i - 1) % realLocations.length];
+            const catKey = catKeys[(i - 1) % catKeys.length];
+
+            archiveData.push({
+                id: 1000 + i,
+                title: `${template.title} #${i}`,
+                category: catKey,
+                categoryLabel: categories[catKey].label,
+                shortDesc: template.desc,
+                fullDesc: `${template.desc} Pengamatan satelit mengonfirmasi anomali lokal yang terjadi berulang setiap ${i * 4} jam. Medan elektromagnetik di sekitarnya tidak mematuhi hukum fisika standar.`,
+                fact: template.fact,
+                realLocName: loc.name,
+                realCountry: loc.country,
+                realCoords: loc.coords,
+                threatLevel: loc.threat,
+                creepyLog: template.creepyLog
+            });
+        }
+
+        let currentPage = 1;
+        const itemsPerPage = 9;
+        let filteredData = [...archiveData];
+        let currentCategory = 'all';
+        let activeItem = null;
+
+        function renderArchive() {
+            const grid = document.getElementById('archiveGrid');
+            grid.innerHTML = '';
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = filteredData.slice(start, end);
+
+            if (pageItems.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500 font-mono">
+                        <p class="text-sm">[ERROR 404]: No matching anomalous record found.</p>
+                    </div>
+                `;
+                updatePaginationControls(0);
+                return;
+            }
+
+            pageItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'space-card rounded-xl p-5 flex flex-col justify-between cursor-pointer group relative overflow-hidden';
+                card.onclick = () => openModal(item);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[10px] font-mono text-cyan-300 bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-500/30">
+                                ${item.categoryLabel}
+                            </span>
+                            <span class="text-xs font-mono text-gray-500 group-hover:text-cyan-400 transition-colors">REC-#${item.id}</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-1.5 font-orbitron group-hover:text-cyan-300 transition-colors leading-snug">${item.title}</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed mb-4 font-light line-clamp-2">${item.shortDesc}</p>
+                    </div>
+                    <div>
+                        <div class="bg-black/60 border border-sky-500/20 rounded-lg p-2 mb-3 flex items-center justify-between text-[10px] font-mono text-cyan-400">
+                            <span class="flex items-center gap-1">📍 ${item.realCountry}</span>
+                            <span class="text-red-400 font-bold">${item.threatLevel}</span>
+                        </div>
+                        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono text-gray-500 group-hover:text-gray-300">
+                            <span>Open Multi-Tab Vault</span>
+                            <span class="group-hover:translate-x-1 transition-transform text-cyan-400">→</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            updatePaginationControls(filteredData.length);
+        }
+
+        function updatePaginationControls(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+            document.getElementById('pageIndicator').innerText = `PAGE ${currentPage} / ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalItems === 0;
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderArchive();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        function filterCategory(cat, btnElement) {
+            currentCategory = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white', 'border-sky-400');
+                btn.classList.add('bg-black/50', 'text-gray-400', 'border-sky-500/20');
+            });
+
+            btnElement.classList.remove('bg-black/50', 'text-gray-400', 'border-sky-500/20');
+            btnElement.classList.add('bg-sky-600', 'text-white', 'border-sky-400');
+
+            applyFilterAndSearch();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilterAndSearch);
+
+        function applyFilterAndSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            filteredData = archiveData.filter(item => {
+                const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
+                const matchesSearch = item.title.toLowerCase().includes(query) || 
+                                      item.shortDesc.toLowerCase().includes(query) ||
+                                      item.realLocName.toLowerCase().includes(query) ||
+                                      item.realCountry.toLowerCase().includes(query);
+                return matchesCategory && matchesSearch;
+            });
+            currentPage = 1;
+            renderArchive();
+        }
+
+        // ================= MULTI-TAB MODAL SYSTEM =================
+        function openModal(item) {
+            activeItem = item;
+            const modal = document.getElementById('detailModal');
+            
+            document.getElementById('modalHeader').innerHTML = `
+                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-sky-950/60 border border-sky-500/30 text-cyan-300 font-mono text-xs mb-2">
+                    ${item.categoryLabel} — RECORD ID: #${item.id}
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold text-white font-orbitron">${item.title}</h2>
+            `;
+
+            // Tab 1: Overview
+            document.getElementById('tabContent-overview').innerHTML = `
+                <p class="text-gray-300 text-xs md:text-sm leading-relaxed mb-4 font-light">${item.fullDesc}</p>
+                <div class="bg-sky-950/30 border border-sky-500/30 rounded-xl p-3.5 mb-4">
+                    <h4 class="text-[11px] font-mono text-cyan-400 uppercase tracking-wider mb-1">PARADOX FACT</h4>
+                    <p class="text-xs text-sky-200/80 italic font-sans">"${item.fact}"</p>
+                </div>
+            `;
+
+            // Tab 2: Location
+            document.getElementById('tabContent-location').innerHTML = `
+                <div class="space-y-3 font-mono text-xs">
+                    <div class="bg-black/60 p-3 rounded-xl border border-sky-500/20">
+                        <span class="text-gray-500 block text-[10px]">FACILITY / LOCATION NAME</span>
+                        <span class="text-cyan-300 font-bold text-sm">${item.realLocName}</span>
+                    </div>
+                    <div class="bg-black/60 p-3 rounded-xl border border-sky-500/20 flex justify-between">
+                        <div>
+                            <span class="text-gray-500 block text-[10px]">COUNTRY / REGION</span>
+                            <span class="text-white">${item.realCountry}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-gray-500 block text-[10px]">THREAT LEVEL</span>
+                            <span class="text-red-400 font-bold">${item.threatLevel}</span>
+                        </div>
+                    </div>
+                    <div class="bg-black/60 p-3 rounded-xl border border-sky-500/20">
+                        <span class="text-gray-500 block text-[10px]">GPS COORDINATES</span>
+                        <span class="text-emerald-400 font-mono">${item.realCoords}</span>
+                    </div>
+                </div>
+            `;
+
+            // Tab 3: Evidence (Creepy/Cool)
+            document.getElementById('tabContent-evidence').innerHTML = `
+                <div class="bg-black/80 border border-red-500/40 rounded-xl p-4 font-mono text-xs">
+                    <div class="flex justify-between items-center pb-2 mb-2 border-b border-white/10 text-red-400">
+                        <span class="font-bold flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            INTERCEPTED EVIDENCE LOG
+                        </span>
+                        <span class="text-[9px] text-gray-500">CLEARANCE TIER-5</span>
+                    </div>
+                    <pre class="text-red-300/90 overflow-x-auto whitespace-pre-wrap leading-relaxed font-mono text-[11px]">${item.creepyLog}</pre>
+                </div>
+            `;
+
+            switchTab('overview');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('text-gray-400');
+            });
+            document.querySelectorAll('.tab-page').forEach(page => page.classList.add('hidden'));
+
+            const selectedBtn = document.getElementById(`tab-${tabName}`);
+            const selectedPage = document.getElementById(`tabContent-${tabName}`);
+
+            if (selectedBtn && selectedPage) {
+                selectedBtn.classList.add('active');
+                selectedBtn.classList.remove('text-gray-400');
+                selectedPage.classList.remove('hidden');
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function toggleTerminal() {
+            const terminal = document.getElementById('terminalDrawer');
+            if (terminal.classList.contains('hidden')) {
+                terminal.classList.remove('hidden');
+                setTimeout(() => terminal.classList.remove('translate-y-full'), 10);
+            } else {
+                terminal.classList.add('translate-y-full');
+                setTimeout(() => terminal.classList.add('hidden'), 300);
+            }
+        }
+
+        function handleTerminalCommand(e) {
+            if (e.key === 'Enter') {
+                const input = e.target.value.trim().toLowerCase();
+                const output = document.getElementById('terminalOutput');
+                let response = `> Unknown command: '${input}'. Type 'help' for parameters.`;
+                
+                if (input === 'help') {
+                    response = `> Available commands: 'scan', 'count', 'random', 'clear', 'status'`;
+                } else if (input === 'count') {
+                    response = `> Total real-world anomaly records: ${archiveData.length}`;
+                } else if (input === 'scan') {
+                    response = `> [SCANNING] 3D Realistic Solar System Engine online. All orbit vectors nominal.`;
+                } else if (input === 'random') {
+                    const randomItem = archiveData[Math.floor(Math.random() * archiveData.length)];
+                    openModal(randomItem);
+                    response = `> Opening multi-tab vault REC-#${randomItem.id}...`;
+                } else if (input === 'clear') {
+                    output.innerHTML = '';
+                    e.target.value = '';
+                    return;
+                } else if (input === 'status') {
+                    openSystemStatus();
+                    response = `> Opening Telemetry Diagnostics...`;
+                }
+
+                output.innerHTML += `<p class="text-cyan-300">> ${input}</p><p>${response}</p>`;
+                output.scrollTop = output.scrollHeight;
+                e.target.value = '';
+            }
+        }
+
+        function openSystemStatus() {
+            document.getElementById('statusModal').classList.remove('hidden');
+        }
+
+        function closeSystemStatus() {
+            document.getElementById('statusModal').classList.add('hidden');
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archiveData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "deep_vault_real_locations.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) closeModal();
+        }
+
+        renderArchive();
+    </script>
+</body>
+</html>
